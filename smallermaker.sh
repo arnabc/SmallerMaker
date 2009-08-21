@@ -51,19 +51,19 @@ shrink() {
             if [ $is_animated_gif -eq 1 ]
             then
                 # Is animated gif
-                #shrink_gif $file;
+                shrink_gif $file;
                 local end_size=$(stat -f%z $file)
                 report $file $(($start_size - $end_size))
             else 
                 # Isn't animated gif
                 # step 1, optimize the gif
-                #shrink_gif $file;
+                shrink_gif $file;
                 # step 2, get size of optimied gif as a reference.
                 local gif_size=$(stat -f%z $file)
                 # step 3, convert the gif to png8 and optimize it.
                 local png_file=${file%%$FROM}$TO
                 pngout -q $file;
-                #shrink_png $png_file;
+                shrink_png $png_file;
                 local end_size=$(stat -f%z $png_file)
                 if [ $gif_size -gt $end_size ] # PNG is smaller, use png not gif
                 then
@@ -83,7 +83,7 @@ shrink() {
         elif [ $FILETYPE == $TO ] #input is a png
         then
             local start_size=$(stat -f%z $file)
-            #shrink_png $file;
+            shrink_png $file;
             local end_size=$(stat -f%z $file)
             report $PNGFILE $(($start_size - $end_size))
         fi

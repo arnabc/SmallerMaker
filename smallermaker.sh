@@ -5,51 +5,66 @@ TO=png
 CRUSHED=opt.png
 IMGPATH=$1
 IMGPATH=${IMGPATH:=.}
-files=$(find $IMGPATH -regex ".*.[png|gif|jpg]") 
-count=$(find $IMGPATH -regex ".*.[png|gif|jpg]" | wc -l)
 current=1
 
-echo $count "total files to process."
-printf "#/#: orginal file : new file : space saved\n"
+header() {
+    echo "#/#: orginal file : new file : space saved\n"
+    echo $count "total files to process."
+}
 
-#"stat -f%z bob.txt" will return just the file size in bytes
+report() {
+    printf " : %q : %q bytes\n" $1 $2
+}
 
-for file in $files;do
+shrink_png() {
+    local file=$1
+    PNGFILE=$file
+    PNGCRUSHED=${file%%$TO}$CRUSHED
+    pngcrush -rem gAMA -rem cHRM -rem iCCP -rem sRGB -brute -q -e .$CRUSHED $PNGFILE;
+    rm $PNGFILE;
+    optipng -o7 -q $PNGCRUSHED;
+    advpng -z -4 -q $PNGCRUSHED;
+    pngout -q $PNGCRUSHED;
+    mv $PNGCRUSHED $PNGFILE;
+}
+shrink() {
+    local file=$1
     printf "%q/%q: %q" $current $count $file 
     FILETYPE=`file $file | awk '{print $2}' | tr '[A-Z]' '[a-z]'`;
         if [ $FILETYPE == $FROM ] #input is a gif
         then
-            PNGFILE=`echo $file | sed "s/$FROM/$TO/g"`;
-            PNGCRUSHED=`echo $file | sed "s/$FROM/$CRUSHED/g"`;
+            local start_size=$(stat -f%z $file)
+            local png_file=${file%%$FROM}$TO
             pngout -q $file;
-            pngcrush -rem gAMA -rem cHRM -rem iCCP -rem sRGB -brute -q -e .$CRUSHED $PNGFILE;
-            rm $PNGFILE;
-            optipng -o7 -q $PNGCRUSHED;
-            advpng -z -4 -q $PNGCRUSHED;
-            pngout -q $PNGCRUSHED;
-            mv $PNGCRUSHED $PNGFILE;
-            let spaceSaved=`ls -l $PNGFILE | awk '{print $5}'`-`ls -l $file | awk '{print $5}'`
-            if [ `ls -l $file | awk '{print $5}'` -gt `ls -l $PNGFILE | awk '{print $5}'` ] # PNG is smaller, use png not gif
+            shrink_png $png_file
+            local end_size=$(stat -f%z $png_file)
+            if [ $start_size -gt $end_size ] # PNG is smaller, use png not gif
             then
                 rm $file;
-                printf " : %q : %q bytes\n" $PNGFILE $spaceSaved
+                report $PNGFILE $(($start_size - $end_size))
             else # GIF is smaller, so delete the generated png
-                rm $PNGFILE
-                printf " : %q : 0 bytes\n" $file
+                rm $png_file
+                report $file 0
             fi
         elif [ $FILETYPE == $TO ] #input is a png
         then
-            originalSize=`ls -l $file | awk '{print $5}'`
-            PNGFILE=`echo $file`;
-            PNGCRUSHED=`echo $file | sed "s/$TO/$CRUSHED/g"`;
-            pngcrush -rem gAMA -rem cHRM -rem iCCP -rem sRGB -brute -q -e .$CRUSHED $PNGFILE;
-            rm $PNGFILE;
-            optipng -o7 -q $PNGCRUSHED;
-            advpng -z -4 -q $PNGCRUSHED;
-            pngout -q $PNGCRUSHED;
-            mv $PNGCRUSHED $PNGFILE;
-            let spaceSaved=`ls -l $PNGFILE | awk '{print $5}'`-originalSize
-            printf " : %q : %q bytes\n" $PNGFILE $spaceSaved
+            local start_size=$(stat -f%z $file)
+            shrink_png $file
+            local end_size=$(stat -f%z $file)
+            report $PNGFILE $(($start_size - $end_size))
         fi
     let current=current+1
-done
+}
+
+if [ -f $IMGPATH ]; then
+    count=1
+    header
+    shrink $IMGPATH
+else
+    files=$(find $IMGPATH -regex ".*.[png|gif|jpg]") 
+    count=$(find $IMGPATH -regex ".*.[png|gif|jpg]" | wc -l)
+    header
+    for file in $files; do
+        shrink $file
+    done
+fi

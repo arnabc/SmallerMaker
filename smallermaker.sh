@@ -16,6 +16,19 @@ report() {
     printf " : %q : %q bytes\n" $1 $2
 }
 
+shrink_jpeg() {
+    local file=$1
+    jpegtran -copy none -trim -optimize -outfile $file.jpg $file;
+    mv $file.jpg $file
+    wrjpgcom -replace -comment "" $file
+    jpegoptim -q $file
+}
+
+shrink_gif() {
+    local file=$1
+    gifsicle --batch -O2 $file;
+}
+
 shrink_png() {
     local file=$1
     PNGFILE=$file
@@ -34,22 +47,43 @@ shrink() {
         if [ $FILETYPE == $FROM ] #input is a gif
         then
             local start_size=$(stat -f%z $file)
-            local png_file=${file%%$FROM}$TO
-            pngout -q $file;
-            shrink_png $png_file
-            local end_size=$(stat -f%z $png_file)
-            if [ $start_size -gt $end_size ] # PNG is smaller, use png not gif
+            local is_animated_gif=`gifsicle -I $file | grep -c 'loop'`; # Need to determine if this is an animated gif.
+            if [ $is_animated_gif -eq 1 ]
             then
-                rm $file;
-                report $PNGFILE $(($start_size - $end_size))
-            else # GIF is smaller, so delete the generated png
-                rm $png_file
-                report $file 0
+                # Is animated gif
+                #shrink_gif $file;
+                local end_size=$(stat -f%z $file)
+                report $file $(($start_size - $end_size))
+            else 
+                # Isn't animated gif
+                # step 1, optimize the gif
+                #shrink_gif $file;
+                # step 2, get size of optimied gif as a reference.
+                local gif_size=$(stat -f%z $file)
+                # step 3, convert the gif to png8 and optimize it.
+                local png_file=${file%%$FROM}$TO
+                pngout -q $file;
+                #shrink_png $png_file;
+                local end_size=$(stat -f%z $png_file)
+                if [ $gif_size -gt $end_size ] # PNG is smaller, use png not gif
+                then
+                    rm $file;
+                    report $PNGFILE $(($start_size - $end_size))
+                else # GIF is smaller, so delete the generated png
+                    rm $png_file
+                    report $file 0
+                fi
             fi
+        elif [ $FILETYPE == 'jpeg' ] # input is a jpeg
+        then
+            local start_size=$(stat -f%z $file)
+            shrink_jpeg $file;
+            local end_size=$(stat -f%z $file)
+            report $file $(($start_size - $end_size))
         elif [ $FILETYPE == $TO ] #input is a png
         then
             local start_size=$(stat -f%z $file)
-            shrink_png $file
+            #shrink_png $file;
             local end_size=$(stat -f%z $file)
             report $PNGFILE $(($start_size - $end_size))
         fi
@@ -61,8 +95,8 @@ if [ -f $IMGPATH ]; then
     header
     shrink $IMGPATH
 else
-    files=$(find $IMGPATH -regex ".*.[png|gif|jpg]") 
-    count=$(find $IMGPATH -regex ".*.[png|gif|jpg]" | wc -l)
+    files=$(find $IMGPATH -regex ".*.[jpg|png|gif]") 
+    count=$(find $IMGPATH -regex ".*.[jpg|png|gif]" | wc -l)
     header
     for file in $files; do
         shrink $file

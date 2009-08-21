@@ -31,15 +31,11 @@ shrink_gif() {
 
 shrink_png() {
     local file=$1
-    PNGFILE=$file
-    PNGCRUSHED=${file%%$TO}$CRUSHED
-    pngcrush -rem gAMA -rem cHRM -rem iCCP -rem sRGB -brute -q -e .$CRUSHED $PNGFILE;
-    rm $PNGFILE;
-    optipng -o7 -q $PNGCRUSHED;
-    advpng -z -4 -q $PNGCRUSHED;
-    pngout -q $PNGCRUSHED;
-    mv $PNGCRUSHED $PNGFILE;
+    optipng -o7 -q $file;
+    advpng -z -4 -q $file;
+    pngout -q $file;
 }
+
 shrink() {
     local file=$1
     printf "%q/%q: %q" $current $count $file 
@@ -68,7 +64,7 @@ shrink() {
                 if [ $gif_size -gt $end_size ] # PNG is smaller, use png not gif
                 then
                     rm $file;
-                    report $PNGFILE $(($start_size - $end_size))
+                    report $png_file $(($start_size - $end_size))
                 else # GIF is smaller, so delete the generated png
                     rm $png_file
                     report $file 0
@@ -85,7 +81,7 @@ shrink() {
             local start_size=$(stat -f%z $file)
             shrink_png $file;
             local end_size=$(stat -f%z $file)
-            report $PNGFILE $(($start_size - $end_size))
+            report $file $(($start_size - $end_size))
         fi
     let current=current+1
 }

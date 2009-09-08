@@ -102,8 +102,18 @@ shrink() {
         then
             local start_size=$(stat -f%z $file)
             shrink_jpeg $file;
-            local end_size=$(stat -f%z $file)
-            report $file $(($start_size - $end_size))
+            local jpeg_size=$(stat -f%z $file)
+            pngout -q $file;
+            shrink_png $png_file;
+            local end_size=$(stat -f%z $png_file)
+            if [ $jpeg_size -gt $end_size ]
+            then
+                rm $file;
+                report $png_file $(($start_size - $end_size))
+            else
+                rm $png_file
+                report $file $(($start_size - $jpeg_size))
+            fi
         elif [ $FILETYPE == $TO ] #input is a png
         then
             local start_size=$(stat -f%z $file)

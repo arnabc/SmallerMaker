@@ -1,0 +1,29 @@
+SmallerMaker is a small bash script designed to compress images without sacrificing quality.
+http://github.com/kristoferbaxter/SmallerMaker/
+
+Required dependencies
+---------------------
+1. ImageMagick - http://www.imagemagick.org/
+2. JpegTran - http://jpegclub.org/jpegtran/
+3. wrjpgcom
+4. jpegoptim - http://www.kokkonen.net/tjko/projects.html
+5. Gifsicle - http://www.lcdf.org/gifsicle/
+6. OptiPNG - http://optipng.sourceforge.net/
+7. PNGOUT - http://advsys.net/ken/utils.htm#pngout 
+   * Please note you must download PNGOUT from Ken Silverman's Utility Page.
+8. ADVPNG - http://advancemame.sourceforge.net/comp-readme.html
+
+Example usage
+---------------------
+1. SmallerMaker can accept a single file to compress ( will replace existing file )
+   
+   kbaxterlt:SmallerMaker kbaxter$ sh smallermaker.sh /Users/kbaxter/Desktop/test/test.gif
+   
+2. SmallerMaker can accept a single directory to compress all images within ( and all child folders too )
+
+   kbaxterlt:SmallerMaker kbaxter$ sh smallermaker.sh /Users/kbaxter/Desktop/test
+
+
+Support
+---------------------
+You must be crazy. If you can fix an issue, that'd be awesome. Please contribute back.

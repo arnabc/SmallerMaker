@@ -5,6 +5,8 @@ TO=png
 CRUSHED=opt.png
 IMGPATH=$1
 IMGPATH=${IMGPATH:=.}
+PNG24='rgba'
+PNG8='rgb'
 current=1
 
 header() {
@@ -31,9 +33,35 @@ shrink_gif() {
 
 shrink_png() {
     local file=$1
-    optipng -o7 -q $file;
-    advpng -z -4 -q $file;
+    local colorType=`file test2.png | awk '{print $9}' | tr '[A-Z]' '[a-z]' | tr -d ','`;
+    if [ $colorType == $PNG24 ] # This is a png24, do dirty transparency filtering ( note this is destructive technically, but not noticeable unless someone removed the image mask. )
+    then
+        dirty_transparency $file
+    fi
+    optipng -o7 -q $file;    
     pngout -q $file;
+    advpng -z -4 -q $file;
+}
+
+dirty_transparency() {
+    local file=$1
+    local mask=$file.mask.png
+    local fixedTransparency=$1.fixed.png
+    # Time for the dirty compression support.
+    # 1. Extract alpha mask of image
+    # 2. Combine the alpha mask to the image contents
+    # 3. Flatten the new image ( mask + image )
+    # 4. Apply the original mask onto the new image ( now masked areas dont have any image data but a solid background )
+    
+    # convert butterfly2.png -alpha extract mask.png
+    # convert mask.png -combine butterfly2.png -flatten test.png
+    # composite -compose Dst_In -gravity center butterfly2.png test.png -matte butterfly2.png
+    
+    convert $file -alpha extract $mask
+    convert $mask -combine $file -flatten $fixedTransparency
+    composite -compose Dst_In -gravity center $file $fixedTransparency -matte $file
+    rm $mask
+    rm $fixedTransparency
 }
 
 shrink() {

@@ -33,7 +33,7 @@ shrink_gif() {
 
 shrink_png() {
     local file=$1
-    local colorType=`file test2.png | awk '{print $9}' | tr '[A-Z]' '[a-z]' | tr -d ','`;
+    local colorType=`file $file | awk '{print $9}' | tr '[A-Z]' '[a-z]' | tr -d ','`;
     if [ $colorType == $PNG24 ] # This is a png24, do dirty transparency filtering ( note this is destructive technically, but not noticeable unless someone removed the image mask. )
     then
         dirty_transparency $file

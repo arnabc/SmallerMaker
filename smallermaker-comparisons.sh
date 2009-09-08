@@ -47,7 +47,15 @@ shrink_png() {
     
     # Step 6, optipng, then advpng, then pngout
     pngout -q $PNGFILE;
+    printf "%q\noptipng+pngout+advpng - " $(stat -f%z $PNGFILE)
+    
+    # Step 7, optipng, then pngout, then advpng
+    cp $PNGFILE.bak $PNGFILE;
+    optipng -o7 -q $PNGFILE;
+    pngout -q $PNGFILE;
+    advpng -z -4 -q $PNGFILE;
     printf "%q\n" $(stat -f%z $PNGFILE)
+    
     
     rm $PNGFILE.bak;
     

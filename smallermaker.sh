@@ -38,9 +38,9 @@ shrink_png() {
     then
         dirty_transparency $file
     fi
-    optipng -o7 -q $file;    
-    pngout -q $file;
+    optipng -o7 -q $file;
     advpng -z -4 -q $file;
+    pngout -q $file;
 }
 
 dirty_transparency() {

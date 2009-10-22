@@ -34,10 +34,10 @@ shrink_gif() {
 shrink_png() {
     local file=$1
     local colorType=`file $file | awk '{print $9}' | tr '[A-Z]' '[a-z]' | tr -d ','`;
-    if [ $colorType == $PNG24 ] # This is a png24, do dirty transparency filtering ( note this is destructive technically, but not noticeable unless someone removed the image mask. )
-    then
-        dirty_transparency $file
-    fi
+    #if [ $colorType == $PNG24 ] # This is a png24, do dirty transparency filtering ( note this is destructive technically, but not noticeable unless someone removed the image mask. )
+    #then
+    #    dirty_transparency $file
+    #fi
     optipng -o7 -q $file;
     advpng -z -4 -q $file;
     pngout -q $file;
@@ -47,6 +47,12 @@ dirty_transparency() {
     local file=$1
     local mask=$file.mask.png
     local fixedTransparency=$1.fixed.png
+    
+    # convert mask2.png -white-threshold 0% mask21.png - Takes the mask and converts anything not black to white.
+    # convert mask21.png -matte -fill none -draw 'color 255,255 replace' mask21none.png - Takes the black and white version and removes the white, leaving only the black overlay
+    # convert zoom2.png mask21none.png -flatten zoom2test.png - Takes new layer ( black exclusion one from mask ) and puts it on top of original, then flattens ( Broken, this doesn't work properly )
+    
+    
     # Time for the dirty compression support.
     # 1. Extract alpha mask of image
     # 2. Combine the alpha mask to the image contents
@@ -58,7 +64,7 @@ dirty_transparency() {
     # composite -compose Dst_In -gravity center butterfly2.png test.png -matte butterfly2.png
     
     convert $file -alpha extract $mask
-    convert $mask -combine $file -flatten $fixedTransparency
+    convert $mask -channel RGB -combine $file -flatten $fixedTransparency
     composite -compose Dst_In -gravity center $file $fixedTransparency -matte $file
     rm $mask
     rm $fixedTransparency

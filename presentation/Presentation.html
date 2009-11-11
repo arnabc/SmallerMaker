@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <meta name="description" content="Image Optimization Kristofer Baxter Local Matters Really? 20 Minutes on this!  105 KB 62 KB 2.6 MB 1.8 MB  472 KB 432 KB  What this talk won’t be. Highly Technical   What format should I use? JPEG GIF Unless it’s animated. PNG PNG 8	PNG 24 Color Count	256	Millions Transparency	Simple	Complex Filesize Cost	Small	Large  Replaces GIF Complex Only Lossless Compression JPEG Compression jpegoptim Optimize the Huffman coding layer wrcomjpg Removes meta and exif data jpegtran Tweaks Huffman coding layer GIF Compression gifsicle Shrinks colormaps and animations  PNG Compression Filter Optimization	DEFLATE Optimization Ancillary Chunk Removal	Pixel Removal Filter Optimization Name	Filter Function	Reconstruction Filter None	Filt(x) = Orig(x)	Recon(x) = Filt(x) Sub	Filt(x) = Orig(x) - Orig(a)	Recon(x) = Filt(x) + Recon(a) Up	Filt(x) = Orig(x) - Orig(b)	Recon(x) = Filt(x) + Recon(b) Average	Filt(x) = Orig(x) - floor((Orig(a) + Orig(b)) / 2)	Recon(x) = Filt(x) + floor((Recon(a) + Recon(b)) / 2) Paeth	Filt(x) = Orig(x) - PaethPredictor(Orig(a), Orig(b), Orig(c))	Recon(x) = Filt(x) + PaethPredictor(Recon(a), Recon(b), Recon(c)) http://www.w3.org/TR/PNG/#9Filters  DEFLATE Optimization AdvCOMP Uses 7-Zip compression methods, efficient but slower than standard zlib PNGOut Proprietary using &quot;an exhaustive search of all patterns&quot; and &quot;[an] advanced block splitter&quot;. Good luck getting more information from him on how this works. Ancillary Chunk Removal Remove all color correction data from PNG files: gamma white balance ICC color profile rgb color profile Pixel Removal http://www.smashingmagazine.com/2009/07/15/clever-png-optimization-techniques/ What tool should I use? Lossy Compression is the first step. Page Speed	Smush.it	PunyPNG	SmallerMaker jpegtran				 wrcomjpg				 jpegoptim				 gifsicle				 optipng				 advpng				 pngout				 dirty trans				 Toolkit Comparisons"/>
+    <title></title>
+    <script type="text/javascript" language="javascript">
+//      <![CDATA[
+            var images = new Array (37);
+            images[0] = "Presentation_files/Presentation.001-001.png";
+            images[1] = "Presentation_files/Presentation.002-001.png";
+            images[2] = "Presentation_files/Presentation.003-001.png";
+            images[3] = "Presentation_files/Presentation.004-001.png";
+            images[4] = "Presentation_files/Presentation.005-001.png";
+            images[5] = "Presentation_files/Presentation.006-001.png";
+            images[6] = "Presentation_files/Presentation.007-001.png";
+            images[7] = "Presentation_files/Presentation.007-002.png";
+            images[8] = "Presentation_files/Presentation.008-001.png";
+            images[9] = "Presentation_files/Presentation.009-001.png";
+            images[10] = "Presentation_files/Presentation.010-001.png";
+            images[11] = "Presentation_files/Presentation.011-001.png";
+            images[12] = "Presentation_files/Presentation.011-002.png";
+            images[13] = "Presentation_files/Presentation.012-001.png";
+            images[14] = "Presentation_files/Presentation.013-001.png";
+            images[15] = "Presentation_files/Presentation.013-002.png";
+            images[16] = "Presentation_files/Presentation.013-003.png";
+            images[17] = "Presentation_files/Presentation.014-001.png";
+            images[18] = "Presentation_files/Presentation.015-001.png";
+            images[19] = "Presentation_files/Presentation.016-001.png";
+            images[20] = "Presentation_files/Presentation.017-001.png";
+            images[21] = "Presentation_files/Presentation.017-002.png";
+            images[22] = "Presentation_files/Presentation.017-003.png";
+            images[23] = "Presentation_files/Presentation.017-004.png";
+            images[24] = "Presentation_files/Presentation.017-005.png";
+            images[25] = "Presentation_files/Presentation.018-001.png";
+            images[26] = "Presentation_files/Presentation.018-002.png";
+            images[27] = "Presentation_files/Presentation.018-003.png";
+            images[28] = "Presentation_files/Presentation.019-001.png";
+            images[29] = "Presentation_files/Presentation.020-001.png";
+            images[30] = "Presentation_files/Presentation.021-001.png";
+            images[31] = "Presentation_files/Presentation.021-002.png";
+            images[32] = "Presentation_files/Presentation.021-003.png";
+            images[33] = "Presentation_files/Presentation.022-001.png";
+            images[34] = "Presentation_files/Presentation.023-001.png";
+            images[35] = "Presentation_files/Presentation.023-002.png";
+            images[36] = "Presentation_files/Presentation.024-001.png";
+            var index = 0;
+            function WindowLoaded(evt)
+            {
+                document.body.onselectstart = function () { return false; };
+            }
+            function Step(i)
+            {
+                GoTo(index + i)
+            }
+            function GoTo(newIndex)
+            {
+                if(newIndex >= 0 && newIndex < images.length)
+                {
+                    index = newIndex;
+                    document.Slideshow.src = images[index];
+                }
+            }
+//      ]]>
+    </script>
+</head>
+<body bgcolor="black" onload='WindowLoaded(event);'>
+    <p align="center">
+        <br/>
+        <br/>
+        <img name="Slideshow" alt="" src="Presentation_files/Presentation.001-001.png" onclick="Step(1)"/>
+        <br/>
+        <br/>
+        <input type="image" src="Presentation_files/home.png" onclick="GoTo(0)"/>
+        &nbsp;&nbsp;&nbsp;
+        <input type="image" src="Presentation_files/prev.png" onclick="Step(-1)"/>
+        <input type="image" src="Presentation_files/next.png" onclick="Step(1)"/>
+    </p>
+</body>
+</html>

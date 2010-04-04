@@ -9,6 +9,11 @@ PNG24='rgba'
 PNG8='rgb'
 current=1
 
+# get the OS type, we need it later for branching
+OS=`uname`
+# by default use Unix/Mac 'stat' command
+STATS_CMD="stat -f%z "
+
 header() {
     echo "#/#: orginal file : new file : space saved\n"
     echo $count "total files to process."
@@ -76,25 +81,25 @@ shrink() {
     FILETYPE=`file $file | awk '{print $2}' | tr '[A-Z]' '[a-z]'`;
         if [ $FILETYPE == $FROM ] #input is a gif
         then
-            local start_size=$(stat -f%z $file)
+            local start_size=$($STATS_CMD $file)
             local is_animated_gif=`gifsicle -I $file | grep -c 'loop'`; # Need to determine if this is an animated gif.
             if [ $is_animated_gif -eq 1 ]
             then
                 # Is animated gif
                 shrink_gif $file;
-                local end_size=$(stat -f%z $file)
+                local end_size=$($STATS_CMD $file)
                 report $file $(($start_size - $end_size))
             else 
                 # Isn't animated gif
                 # step 1, optimize the gif
                 shrink_gif $file;
                 # step 2, get size of optimied gif as a reference.
-                local gif_size=$(stat -f%z $file)
+                local gif_size=$($STATS_CMD $file)
                 # step 3, convert the gif to png8 and optimize it.
                 local png_file=${file%%$FROM}$TO
                 pngout -q $file;
                 shrink_png $png_file;
-                local end_size=$(stat -f%z $png_file)
+                local end_size=$($STATS_CMD $png_file)
                 if [ $gif_size -gt $end_size ] # PNG is smaller, use png not gif
                 then
                     rm $file;
@@ -106,12 +111,12 @@ shrink() {
             fi
         elif [ $FILETYPE == 'jpeg' ] # input is a jpeg
         then
-            local start_size=$(stat -f%z $file)
+            local start_size=$($STATS_CMD $file)
             shrink_jpeg $file;
-            local jpeg_size=$(stat -f%z $file)
+            local jpeg_size=$($STATS_CMD $file)
             pngout -q $file;
             shrink_png $png_file;
-            local end_size=$(stat -f%z $png_file)
+            local end_size=$($STATS_CMD $png_file)
             if [ $jpeg_size -gt $end_size ]
             then
                 rm $file;
@@ -122,13 +127,22 @@ shrink() {
             fi
         elif [ $FILETYPE == $TO ] #input is a png
         then
-            local start_size=$(stat -f%z $file)
+            local start_size=$($STATS_CMD $file)
             shrink_png $file;
-            local end_size=$(stat -f%z $file)
+            local end_size=$($STATS_CMD $file)
             report $file $(($start_size - $end_size))
         fi
     let current=current+1
 }
+
+# toggle to proper stat command depending on OS.
+# in Linux(Ubuntu) the 'stat' command used in the code
+# slightly differs from Mac/Unix for example: %z will 
+# return the timestamp where as "-c" is used to specify 
+# the FORMAT sequence, but in Mac it's "-f"
+if [ $OS == 'Linux' ]; then
+    STATS_CMD="stat -c %s "
+fi
 
 if [ -f $IMGPATH ]; then
     count=1
